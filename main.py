@@ -72,7 +72,6 @@ def possibilities(state):
                 else:
                     anz = free_spaces_dst
                 if same_colors_dst + anz == k:
-                    # print("good move")
                     return [(src, k - free_spaces_src - anz, dst, k - free_spaces_dst, anz)]
                 else:
                     pos_moves.append((src, k - free_spaces_src - anz, dst, k - free_spaces_dst,
@@ -104,6 +103,7 @@ def topElm(glass):
 
 def solved(state):
     return all(all(glass[0] == fluid for fluid in glass[1:]) for glass in state)
+
 
 found_solution_, solution_ = decant(start, [], 200)
 if found_solution_:
