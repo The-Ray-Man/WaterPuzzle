@@ -7,8 +7,7 @@ start = np.array(
     [[1, 2, 3, 2], [1, 4, 3, 5], [6, 5, 1, 1], [4, 7, 8, 9], [6, 9, 7, 4], [8, 9, 9, 3], [3, 6, 5, 4], [5, 6, 7, 8],
      [8, 2, 2, 7], [0, 0, 0, 0], [0, 0, 0, 0]])
 
-solution = []
-already_checked = set()
+already_checked = dict()
 
 
 def sort(state):
@@ -17,24 +16,40 @@ def sort(state):
     return byte_state
 
 
-def decant(state):
+def decant(state, pass_solution, max_depth):
     if solved(state):
         # print("found Solution")
         # solution.append(state)
-        return True
+        return True, pass_solution
+
+    if sort(state) in already_checked:
+        if already_checked[sort(state)] <= len(pass_solution):
+            return False, []
+    already_checked[sort(state)] = len(pass_solution)
+
+    if len(pass_solution) >= max_depth:
+        # print("max depth")
+        return False, []
+
+    solution = None
 
     for pos in possibilities(state):
+        if pass_solution and pass_solution[-1] == (pos[2], pos[0]):
+            continue
         # print(pos)
         new_state = doMove(deepcopy(state), pos)
         # print(new_state)
-        if sort(new_state) in already_checked:
-            # print("already seen!")
-            continue
-        already_checked.add(sort(new_state))
-        if decant(new_state):
-            solution.append(f"{pos[0] + 1}-->{pos[2] + 1}")
-            return True
-    return False
+
+        found_solution, possible_solution = decant(new_state, pass_solution + [(pos[0], pos[2])], max_depth)
+        if found_solution:
+            # print(len(possible_solution))
+            if len(possible_solution) < max_depth:
+                # print("new good solution", possible_solution)
+                solution = possible_solution
+                max_depth = len(possible_solution)
+    if solution:
+        return True, solution
+    return False, []
 
 
 def doMove(state, move):
@@ -57,8 +72,7 @@ def possibilities(state):
                 else:
                     anz = free_spaces_dst
                 if same_colors_dst + anz == k:
-                    # print("good move")
-                    pos_moves.insert(0, (src, k - free_spaces_src - anz, dst, k - free_spaces_dst, anz))
+                    return [(src, k - free_spaces_src - anz, dst, k - free_spaces_dst, anz)]
                 else:
                     pos_moves.append((src, k - free_spaces_src - anz, dst, k - free_spaces_dst,
                                       anz))  # (source,pos_source,destination,pos_dest, anz)
@@ -91,7 +105,8 @@ def solved(state):
     return all(all(glass[0] == fluid for fluid in glass[1:]) for glass in state)
 
 
-if decant(start):
-    print(solution[::-1], len(solution))
+found_solution_, solution_ = decant(start, [], 200)
+if found_solution_:
+    print(solution_, len(solution_))
 else:
     print("maybe impossible to solve!")
