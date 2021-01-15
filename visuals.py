@@ -13,11 +13,12 @@ def find_glasses(im,thresh):
     i = 0
     for cnt in contours:
         if cv2.contourArea(cnt)>500 and cv2.contourArea(cnt)<100000:
-            i += 1
             [x,y,w,h] = cv2.boundingRect(cnt)
-            if h > average_height*1.1/i or h < average_height*0.9/i and average_height != 0:
-                continue
-            average_height += h
+            # if not i == 0:
+            #     if (h > average_height*1.1/i or h < average_height*0.9/i) or average_height != 0:
+            #         continue
+            # i += 1
+            # average_height += h
             if w/h < 0.3:
                 if all(do_collide([x,y,w,h],s) == False for s in found_positions):
                     found_positions.append([x,y,w,h])
@@ -47,25 +48,39 @@ def get_glasses(image,x_handy,y_handy):
     color_id = 0
 
     for x,y,w,h in list(find_glasses(im,thresh)):
-        h_ = h//6*5 // 4
+        h_ = h//10*9 // 4
         liquids = []
         for i in range(4):
-            pos = (x+w//2, y+i*h_+h_//2+h//6)
+            pos = ((x+w//2), (y+i*h_+h_//2+h//9))
+            print(pos)
             color = blur[pos[1],pos[0]]
             print(color)
             color_combined = color[2]*256**2 + color[1]*256 + color[0]
-            # cv2.circle(image, pos, 10, (255,0,0), 10)
-            # cv2.imshow("title",image)
-            # key = cv2.waitKey(0)
+            cv2.circle(image, pos, 10, (255,0,0), 10)
+            cv2.imshow("title",image)
+            key = cv2.waitKey(0)
             g = get_gray_value(color)
-            # print(g)
-            if g > 55 and g < 375: 
-                if color_dic[color_combined] == None:
+            
+            if color_id == 0:
+                color_dic[color_combined] = 0
+                color_id = 1
+
+            if color_dic[color_combined] != None:
+                liquids.insert(0,color_dic[color_combined])
+
+            else:
+                for color_code,id_ in color_dic.items():
+                    c_x,c_y,c_z = reverse_colorcode(color_code)
+                    d = calculate_distance(color,(c_x,c_y,c_z))
+                    print("d: ",d)
+                    if d < 10:
+                        color_id = color_dic[color_code]
+                        liquids.insert(0,color_id)
+                        break
+                else :
                     color_id += 1
                     color_dic[color_combined] = color_id
-                liquids.insert(0,color_dic[color_combined])
-            else:
-                liquids.insert(0,0)
+                    liquids.insert(0,color_id)
 
         glasses.append(liquids)
         glasses_pos.append((x+w//2 + x_handy,y+h//2 + y_handy))
@@ -125,3 +140,18 @@ def read_display():
     glasses,glasses_pos = get_glasses(image,x,y)
     return glasses, glasses_pos
 
+
+
+def calculate_distance(v1,v2):
+    x1,y1,z1 = v1
+    x2,y2,z2 = v2
+    return ((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)**0.5
+
+def reverse_colorcode(color_code):
+    x_color = color_code // (265**2)
+    color_code -= x_color
+    y_color = color_code // (265)
+    color_code -= y_color
+    z_color = color_code
+    print("reversed colors:" x_color,y_color,z_color)
+    return x_color,y_color,z_color
