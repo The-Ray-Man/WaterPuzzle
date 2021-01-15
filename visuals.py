@@ -9,15 +9,21 @@ def not_there():
 def find_glasses(im,thresh):
     contours,hierarchy = cv2.findContours(thresh,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
     found_positions = []
+    average_height = 0
+    i = 0
     for cnt in contours:
         if cv2.contourArea(cnt)>500 and cv2.contourArea(cnt)<100000:
+            i += 1
             [x,y,w,h] = cv2.boundingRect(cnt)
+            if h > average_height*1.1/i or h < average_height*0.9/i and average_height != 0:
+                continue
+            average_height += h
             if w/h < 0.3:
                 if all(do_collide([x,y,w,h],s) == False for s in found_positions):
                     found_positions.append([x,y,w,h])
                     cv2.rectangle(im,(x,y),(x+w,y+h),(0,0,255),2)
-                    cv2.imshow('norm',im)
-                    key = cv2.waitKey(0)
+                    cv2.imshow("glasses",im)
+                    cv2.waitKey(0)
                     # roi = im[y:y+h,x:x+w]
                     # yield(roi)
                     yield [x,y,w,h]
@@ -41,24 +47,25 @@ def get_glasses(image,x_handy,y_handy):
     color_id = 0
 
     for x,y,w,h in list(find_glasses(im,thresh)):
-        h_ = h//10*9 // 4
+        h_ = h//6*5 // 4
         liquids = []
         for i in range(4):
-            pos = (x+w//2, y+i*h_+h_//2+h//9)
+            pos = (x+w//2, y+i*h_+h_//2+h//6)
             color = blur[pos[1],pos[0]]
+            print(color)
             color_combined = color[2]*256**2 + color[1]*256 + color[0]
-            cv2.circle(image, pos, 10, (255,0,0), 10)
-            cv2.imshow("title",image)
-            key = cv2.waitKey(0)
+            # cv2.circle(image, pos, 10, (255,0,0), 10)
+            # cv2.imshow("title",image)
+            # key = cv2.waitKey(0)
             g = get_gray_value(color)
-            print(g)
+            # print(g)
             if g > 55 and g < 375: 
                 if color_dic[color_combined] == None:
                     color_id += 1
                     color_dic[color_combined] = color_id
-                liquids.append(color_dic[color_combined])
+                liquids.insert(0,color_dic[color_combined])
             else:
-                liquids.append(0)
+                liquids.insert(0,0)
 
         glasses.append(liquids)
         glasses_pos.append((x+w//2 + x_handy,y+h//2 + y_handy))
@@ -112,10 +119,9 @@ def read_display():
         pos_handy = [x,y,w,h]
     x,y,w,h = pos_handy
     image = image[y:y+h,x:x+w]
-    cv2.imshow('norm',image)
-    key = cv2.waitKey(0)
+    # cv2.imshow('norm',image)
+    # key = cv2.waitKey(0)
     # glasses,glasses_pos = get_glasses(cv2.imread("./WaterPuzzle/screen.jpg"))
     glasses,glasses_pos = get_glasses(image,x,y)
     return glasses, glasses_pos
 
-print(read_display())

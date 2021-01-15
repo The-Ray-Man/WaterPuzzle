@@ -105,8 +105,3 @@ def solved(state):
     return all(all(glass[0] == fluid for fluid in glass[1:]) for glass in state)
 
 
-found_solution_, solution_ = decant(start, [], 200)
-if found_solution_:
-    print(solution_, len(solution_))
-else:
-    print("maybe impossible to solve!")
