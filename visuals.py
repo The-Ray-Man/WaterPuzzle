@@ -15,7 +15,9 @@ def find_glasses(im,thresh):
             if w/h < 0.3:
                 if all(do_collide([x,y,w,h],s) == False for s in found_positions):
                     found_positions.append([x,y,w,h])
-                    # cv2.rectangle(im,(x,y),(x+w,y+h),(0,0,255),2)
+                    cv2.rectangle(im,(x,y),(x+w,y+h),(0,0,255),2)
+                    cv2.imshow('norm',im)
+                    key = cv2.waitKey(0)
                     # roi = im[y:y+h,x:x+w]
                     # yield(roi)
                     yield [x,y,w,h]
@@ -46,10 +48,11 @@ def get_glasses(image,x_handy,y_handy):
             color = blur[pos[1],pos[0]]
             color_combined = color[2]*256**2 + color[1]*256 + color[0]
             cv2.circle(image, pos, 10, (255,0,0), 10)
-            # cv2.imshow('norm',blur)
-            # key = cv2.waitKey(0)
+            cv2.imshow("title",image)
+            key = cv2.waitKey(0)
             g = get_gray_value(color)
-            if g > 55: 
+            print(g)
+            if g > 55 and g < 375: 
                 if color_dic[color_combined] == None:
                     color_id += 1
                     color_dic[color_combined] = color_id
@@ -74,7 +77,9 @@ def findHandy(image,thresh):
                 cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,255),2)
                 roi = thresh[y:y+h,x:x+w]
                 im = image[y:y+h,x:x+w]
-                cv2.imwrite("./screen.jpg",im)
+                # cv2.imwrite("./screen.jpg",im)
+                cv2.imshow('norm',image)
+                key = cv2.waitKey(0)
                 if key == 13:
                     cv2.destroyAllWindows()
                     return [x,y,w,h]
@@ -98,6 +103,7 @@ def get_gray_value(color_code):
 pos_handy = None
 
 def read_display():
+    global pos_handy
     image = pyautogui.screenshot()
     image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     thresh = thresh_im(image)
@@ -106,6 +112,10 @@ def read_display():
         pos_handy = [x,y,w,h]
     x,y,w,h = pos_handy
     image = image[y:y+h,x:x+w]
+    cv2.imshow('norm',image)
+    key = cv2.waitKey(0)
     # glasses,glasses_pos = get_glasses(cv2.imread("./WaterPuzzle/screen.jpg"))
     glasses,glasses_pos = get_glasses(image,x,y)
     return glasses, glasses_pos
+
+print(read_display())
