@@ -13,7 +13,7 @@ def find_glasses(im,thresh):
         if cv2.contourArea(cnt)>500 and cv2.contourArea(cnt)<100000:
             [x,y,w,h] = cv2.boundingRect(cnt)
             if w/h < 0.3:
-                if all(do_colide([x,y,w,h],s) == False for s in found_positions):
+                if all(do_collide([x,y,w,h],s) == False for s in found_positions):
                     found_positions.append([x,y,w,h])
                     # cv2.rectangle(im,(x,y),(x+w,y+h),(0,0,255),2)
                     # roi = im[y:y+h,x:x+w]
@@ -82,7 +82,7 @@ def findHandy(image,thresh):
 
 
 
-def do_colide(s1,s2):
+def do_collide(s1,s2):
     x,y,w,h = s1
     middle_pos = (x+w//2, y+h//2)
     x,y,w,h = s2
