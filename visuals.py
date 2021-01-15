@@ -12,7 +12,7 @@ def find_glasses(im,thresh):
     average_height = 0
     i = 0
     for cnt in contours:
-        if cv2.contourArea(cnt)>500 and cv2.contourArea(cnt)<100000:
+        if cv2.contourArea(cnt)>10000 and cv2.contourArea(cnt)<100000:
             [x,y,w,h] = cv2.boundingRect(cnt)
             # if not i == 0:
             #     if (h > average_height*1.1/i or h < average_height*0.9/i) or average_height != 0:
@@ -23,8 +23,8 @@ def find_glasses(im,thresh):
                 if all(do_collide([x,y,w,h],s) == False for s in found_positions):
                     found_positions.append([x,y,w,h])
                     cv2.rectangle(im,(x,y),(x+w,y+h),(0,0,255),2)
-                    cv2.imshow("glasses",im)
-                    cv2.waitKey(0)
+                    # cv2.imshow("glasses",im)
+                    # cv2.waitKey(0)
                     # roi = im[y:y+h,x:x+w]
                     # yield(roi)
                     yield [x,y,w,h]
@@ -39,13 +39,13 @@ def thresh_im(im):
 def get_glasses(image,x_handy,y_handy):
     im = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     thresh = thresh_im(im)
-    blur = cv2.blur(image,(10,10))
+    blur = cv2.blur(image,(6,6))
 
 
     glasses = []
     glasses_pos = []
     color_dic = defaultdict(not_there)
-    color_id = 0
+    color_id = 1
 
     for x,y,w,h in list(find_glasses(im,thresh)):
         h_ = h//10*9 // 4
@@ -53,19 +53,19 @@ def get_glasses(image,x_handy,y_handy):
         for i in range(4):
             pos = ((x+w//2), (y+i*h_+h_//2+h//9))
             print(pos)
-            color = blur[pos[1],pos[0]]
+            color = im[pos[1],pos[0]]
             print(color)
             color_combined = color[2]*256**2 + color[1]*256 + color[0]
             cv2.circle(image, pos, 10, (255,0,0), 10)
-            cv2.imshow("title",image)
-            key = cv2.waitKey(0)
+            # cv2.imshow("title",image)
+            # key = cv2.waitKey(0)
             g = get_gray_value(color)
             
-            if color_id == 0:
-                color_dic[color_combined] = 0
-                color_id = 1
+            # if color_id == 1:
+            #     color_dic[color_combined] = 1
+            #     color_id = 2
 
-            if color_dic[color_combined] != None:
+            if color_combined in color_dic.keys():
                 liquids.insert(0,color_dic[color_combined])
 
             else:
@@ -73,17 +73,28 @@ def get_glasses(image,x_handy,y_handy):
                     c_x,c_y,c_z = reverse_colorcode(color_code)
                     d = calculate_distance(color,(c_x,c_y,c_z))
                     print("d: ",d)
-                    if d < 10:
-                        color_id = color_dic[color_code]
-                        liquids.insert(0,color_id)
+                    if d < 20:
+                        liquids.insert(0, color_dic[color_code])
                         break
                 else :
-                    color_id += 1
                     color_dic[color_combined] = color_id
                     liquids.insert(0,color_id)
 
+                    color_id += 1
         glasses.append(liquids)
         glasses_pos.append((x+w//2 + x_handy,y+h//2 + y_handy))
+    print(glasses)
+    max_value = 0
+    max_index = 0
+    for i in range(1,len(glasses)):
+        if sum(x.count(i) for x in glasses)>max_value:
+            max_value = sum(x.count(i) for x in glasses)
+            max_index = i
+    for b in range(len(glasses)):
+        for l in range(len(glasses[b])):
+            if glasses[b][l] == max_index:
+                glasses[b][l] = 0
+
     return glasses, glasses_pos
 
 
@@ -148,10 +159,8 @@ def calculate_distance(v1,v2):
     return ((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)**0.5
 
 def reverse_colorcode(color_code):
-    x_color = color_code // (265**2)
-    color_code -= x_color
-    y_color = color_code // (265)
-    color_code -= y_color
-    z_color = color_code
-    print("reversed colors:" x_color,y_color,z_color)
-    return x_color,y_color,z_color
+    x_color = color_code >> 16
+    y_color = (color_code >> 8) & 0b11111111
+    z_color = color_code & 0b11111111
+    print("reversed colors:", z_color, y_color, x_color)
+    return z_color, y_color, x_color
