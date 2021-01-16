@@ -1,7 +1,10 @@
 import cv2
-import pyautogui
 import numpy as np
 from collections import defaultdict
+
+import subprocess
+import os
+import sys
 
 
 def not_there():
@@ -139,10 +142,21 @@ def get_gray_value(color_code):
 pos_handy = None
 
 
+def get_screen():
+    os.system("adb shell screencap -p > screen.png")
+    # cmd = "adb  shell screencap -p"
+    # process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+    # binary_screenshot = process.stdout.read()
+    #
+    # binary_screenshot = binary_screenshot.replace(b'\r\r\n', b'\n')
+    # with open(filename, 'wb') as f:
+    #     f.write(binary_screenshot)
+
+
 def read_display():
     global pos_handy
-    image = pyautogui.screenshot()
-    image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    get_screen()
+    image = cv2.imread("screen.png", cv2.COLOR_RGB2BGR)
     thresh = thresh_im(image)
     if pos_handy is None:
         x, y, w, h = findHandy(image, thresh)
