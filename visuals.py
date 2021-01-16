@@ -38,6 +38,24 @@ def thresh_im(im):
     thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
     return thresh
 
+def highlit_glasses(im):
+    # define range of blue color in HSV
+    lower_blue = np.array([188,188,188])
+    upper_blue = np.array([188,188,188])
+
+    # Threshold the HSV image to get only blue colors
+    mask = cv2.inRange(rgb, lower_blue, upper_blue)
+
+    # Bitwise-AND mask and original image
+    res = cv2.bitwise_and(im,im, mask= mask)
+
+    cv2.imshow('frame',frame)
+    cv2.imshow('mask',mask)
+    cv2.imshow('res',res)
+    k = cv2.waitKey(5) & 0xFF
+    return im
+
+
 
 def get_glasses(image, x_handy, y_handy):
     im = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
@@ -59,8 +77,8 @@ def get_glasses(image, x_handy, y_handy):
             print(color)
             color_combined = color[2] * 256 ** 2 + color[1] * 256 + color[0]
             cv2.circle(image, pos, 10, (255, 0, 0), 10)
-            # cv2.imshow("title",image)
-            # key = cv2.waitKey(0)
+            cv2.imshow("title",image)
+            key = cv2.waitKey(0)
             g = get_gray_value(color)
 
             # if color_id == 1:
@@ -157,9 +175,12 @@ def read_display():
     os.system("adb exec-out screencap -p > pic.png")
 
     image = cv2.imread("pic.png",cv2.COLOR_RGB2BGR)
+    highlit_glasses(image)
     # cv2.imshow("title",image)
     thresh = thresh_im(image)
-    cv2.imshow("thesh",thresh)
+    glass_highlit = highlit_glasses(image)
+    cv2.imshow("thesh",glass_highlit)
+    k = cv2.waitKey(0)
     # if pos_handy is None:
     #     x, y, w, h = findHandy(image, thresh)
     #     pos_handy = [x, y, w, h]
