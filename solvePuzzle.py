@@ -12,6 +12,6 @@ while True:
         bot(solution_, glasses_pos)
     else:
         print("maybe impossible to solve!")
-        break
+        break 
     time.sleep(3)
     playagain()

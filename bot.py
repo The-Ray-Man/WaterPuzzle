@@ -17,15 +17,6 @@ def do_move(move_description, pos_glasses):
     os.system(cmd)
     # pyautogui.click(x=pos_glasses[dst][0], y=pos_glasses[dst][1])
 
-
-
-
-
-
-
-
-
-
 def bot(move_description, pos_glasses):
     glasses_blocked_until = {}
     for pos in pos_glasses:

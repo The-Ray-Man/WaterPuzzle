@@ -39,25 +39,29 @@ def thresh_im(im):
     return thresh
 
 def highlit_glasses(im):
-    # define range of blue color in HSV
-    lower_blue = np.array([188,188,188])
-    upper_blue = np.array([188,188,188])
 
-    # Threshold the HSV image to get only blue colors
-    mask = cv2.inRange(rgb, lower_blue, upper_blue)
+    hsv_img = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
+    cv2.imshow("im",im)
+    cv2.waitKey(0)
+    color1 = np.uint8([[[0, 0, 0 ]]]) #yellow in BGR
+    color2 = np.uint8([[[255, 255, 255]]]) #white in BGR
+    hsv_color1 = cv2.cvtColor(color1,cv2.COLOR_BGR2HSV)
+    hsv_color2 = cv2.cvtColor(color2,cv2.COLOR_BGR2HSV)
+
+    hsv_color1 = np.array([0,0,185])
+    hsv_color2 = np.array([0,0,188])
+
+
+    #Define threshold color range to filter
+    mask = cv2.inRange(hsv_img, hsv_color1, hsv_color2)
 
     # Bitwise-AND mask and original image
-    res = cv2.bitwise_and(im,im, mask= mask)
-
-    cv2.imshow('frame',frame)
-    cv2.imshow('mask',mask)
-    cv2.imshow('res',res)
-    k = cv2.waitKey(5) & 0xFF
-    return im
+    res = cv2.bitwise_and(hsv_img, hsv_img, mask=mask)
+    return res
 
 
 
-def get_glasses(image, x_handy, y_handy):
+def get_glasses(image,glass_hi, x_handy, y_handy):
     im = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     thresh = thresh_im(im)
     blur = cv2.blur(image, (6, 6))
@@ -67,7 +71,7 @@ def get_glasses(image, x_handy, y_handy):
     color_dic = defaultdict(not_there)
     color_id = 1
 
-    for x, y, w, h in list(find_glasses(im, thresh)):
+    for x, y, w, h in list(find_glasses(glass_hi, thresh)):
         h_ = h // 10 * 9 // 4
         liquids = []
         for i in range(4):
@@ -175,12 +179,10 @@ def read_display():
     os.system("adb exec-out screencap -p > pic.png")
 
     image = cv2.imread("pic.png",cv2.COLOR_RGB2BGR)
-    highlit_glasses(image)
+    # highlit_glasses(image)
     # cv2.imshow("title",image)
     thresh = thresh_im(image)
     glass_highlit = highlit_glasses(image)
-    cv2.imshow("thesh",glass_highlit)
-    k = cv2.waitKey(0)
     # if pos_handy is None:
     #     x, y, w, h = findHandy(image, thresh)
     #     pos_handy = [x, y, w, h]
@@ -189,7 +191,7 @@ def read_display():
     # cv2.imshow('norm',image)
     # key = cv2.waitKey(0)
     # glasses,glasses_pos = get_glasses(cv2.imread("./WaterPuzzle/screen.jpg"))
-    glasses, glasses_pos = get_glasses(image, 0, 0)
+    glasses, glasses_pos = get_glasses(image,glass_highlit, 0, 0)
     return glasses, glasses_pos
 
 
