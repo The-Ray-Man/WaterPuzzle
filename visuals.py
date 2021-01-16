@@ -1,11 +1,8 @@
 import cv2
 import numpy as np
 from collections import defaultdict
-
-import subprocess
 import os
-import sys
-
+os.environ['PATH'] = 'C:/Program Files/platform-tools/'
 
 def not_there():
     return None
@@ -78,7 +75,7 @@ def get_glasses(image, x_handy, y_handy):
                     c_x, c_y, c_z = reverse_colorcode(color_code)
                     d = calculate_distance(color, (c_x, c_y, c_z))
                     print("d: ", d)
-                    if d < 20:
+                    if d < 30:
                         liquids.insert(0, color_dic[color_code])
                         break
                 else:
@@ -116,8 +113,8 @@ def findHandy(image, thresh):
                 roi = thresh[y:y + h, x:x + w]
                 im = image[y:y + h, x:x + w]
                 # cv2.imwrite("./screen.jpg",im)
-                cv2.imshow('norm', image)
-                key = cv2.waitKey(0)
+                # cv2.imshow('norm', image)
+                # key = cv2.waitKey(0)
                 if key == 13:
                     cv2.destroyAllWindows()
                     return [x, y, w, h]
@@ -143,7 +140,7 @@ pos_handy = None
 
 
 def get_screen():
-    os.system("adb shell screencap -p > screen.png")
+    pass
     # cmd = "adb  shell screencap -p"
     # process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     # binary_screenshot = process.stdout.read()
@@ -155,18 +152,23 @@ def get_screen():
 
 def read_display():
     global pos_handy
-    get_screen()
-    image = cv2.imread("screen.png", cv2.COLOR_RGB2BGR)
+    os.environ['PATH'] = 'C:/Program Files/platform-tools/'
+
+    os.system("adb exec-out screencap -p > pic.png")
+
+    image = cv2.imread("pic.png",cv2.COLOR_RGB2BGR)
+    # cv2.imshow("title",image)
     thresh = thresh_im(image)
-    if pos_handy is None:
-        x, y, w, h = findHandy(image, thresh)
-        pos_handy = [x, y, w, h]
-    x, y, w, h = pos_handy
-    image = image[y:y + h, x:x + w]
+    cv2.imshow("thesh",thresh)
+    # if pos_handy is None:
+    #     x, y, w, h = findHandy(image, thresh)
+    #     pos_handy = [x, y, w, h]
+    # x, y, w, h = pos_handy
+    # image = image[y:y + h, x:x + w]
     # cv2.imshow('norm',image)
     # key = cv2.waitKey(0)
     # glasses,glasses_pos = get_glasses(cv2.imread("./WaterPuzzle/screen.jpg"))
-    glasses, glasses_pos = get_glasses(image, x, y)
+    glasses, glasses_pos = get_glasses(image, 0, 0)
     return glasses, glasses_pos
 
 

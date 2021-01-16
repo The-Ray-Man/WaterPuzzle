@@ -26,8 +26,12 @@ def bot(move_description, pos_glasses):
 
 
 def playagain():
-    image = pyautogui.screenshot()
-    image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    os.environ['PATH'] = 'C:/Program Files/platform-tools/'
+
+    os.system("adb exec-out screencap -p > pic.png")
+
+    image = cv2.imread("pic.png",cv2.COLOR_RGB2BGR)
+
     method = cv2.TM_SQDIFF_NORMED
     small_image = cv2.imread("./playbutton.png")
 
