@@ -8,27 +8,25 @@ def not_there():
     return None
 
 
-def find_glasses(im, thresh):
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+def find_glasses(glass_hi, im,debug = False):
+    glass_hi = cv2.cvtColor(glass_hi, cv2.COLOR_HSV2BGR)
+    glass_hi = cv2.cvtColor(glass_hi, cv2.COLOR_BGR2GRAY)
+    # cv2.imshow("glass_hi",glass_hi)
+    # cv2.waitKey(0)
+    contours, hierarchy = cv2.findContours(glass_hi, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     found_positions = []
     average_height = 0
     i = 0
     for cnt in contours:
         if 10000 < cv2.contourArea(cnt) < 100000:
             [x, y, w, h] = cv2.boundingRect(cnt)
-            # if not i == 0:
-            #     if (h > average_height*1.1/i or h < average_height*0.9/i) or average_height != 0:
-            #         continue
-            # i += 1
-            # average_height += h
             if w / h < 0.3:
                 if all(do_collide([x, y, w, h], s) is False for s in found_positions):
                     found_positions.append([x, y, w, h])
                     cv2.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                    # cv2.imshow("glasses",im)
-                    # cv2.waitKey(0)
-                    # roi = im[y:y+h,x:x+w]
-                    # yield(roi)
+                    if debug:
+                        cv2.imshow("glasses",im)
+                        cv2.waitKey(0)
                     yield [x, y, w, h]
 
 
@@ -41,12 +39,6 @@ def thresh_im(im):
 def highlit_glasses(im):
 
     hsv_img = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-    # cv2.imshow("im",im)
-    # cv2.waitKey(0)
-    color1 = np.uint8([[[0, 0, 0 ]]]) #yellow in BGR
-    color2 = np.uint8([[[255, 255, 255]]]) #white in BGR
-    hsv_color1 = cv2.cvtColor(color1,cv2.COLOR_BGR2HSV)
-    hsv_color2 = cv2.cvtColor(color2,cv2.COLOR_BGR2HSV)
 
     hsv_color1 = np.array([0,0,185])
     hsv_color2 = np.array([0,0,188])
@@ -61,7 +53,7 @@ def highlit_glasses(im):
 
 
 
-def get_glasses(image,glass_hi, x_handy, y_handy):
+def get_glasses(image,glass_hi,debug = False):
     im = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     thresh = thresh_im(im)
     blur = cv2.blur(image, (6, 6))
@@ -71,7 +63,7 @@ def get_glasses(image,glass_hi, x_handy, y_handy):
     color_dic = defaultdict(not_there)
     color_id = 1
 
-    for x, y, w, h in list(find_glasses(glass_hi, thresh)):
+    for x, y, w, h in list(find_glasses(glass_hi, im)):
         h_ = h // 10 * 9 // 4
         liquids = []
         for i in range(4):
@@ -81,13 +73,10 @@ def get_glasses(image,glass_hi, x_handy, y_handy):
             # print(color)
             color_combined = color[2] * 256 ** 2 + color[1] * 256 + color[0]
             cv2.circle(image, pos, 10, (255, 0, 0), 10)
-            # cv2.imshow("title",image)
-            # key = cv2.waitKey(0)
-            # g = get_gray_value(color)
+            if debug:
+                cv2.imshow("found glasses",im)
+                key = cv2.waitKey(0)
 
-            # if color_id == 1:
-            #     color_dic[color_combined] = 1
-            #     color_id = 2
 
             if color_combined in color_dic.keys():
                 liquids.insert(0, color_dic[color_combined])
@@ -96,7 +85,6 @@ def get_glasses(image,glass_hi, x_handy, y_handy):
                 for color_code, id_ in color_dic.items():
                     c_x, c_y, c_z = reverse_colorcode(color_code)
                     d = calculate_distance(color, (c_x, c_y, c_z))
-                    # print("d: ", d)
                     if d < 30:
                         liquids.insert(0, color_dic[color_code])
                         break
@@ -106,8 +94,13 @@ def get_glasses(image,glass_hi, x_handy, y_handy):
 
                     color_id += 1
         glasses.append(liquids)
-        glasses_pos.append((x + w // 2 + x_handy, y + h // 2 + y_handy))
-    # print(glasses)
+        glasses_pos.append((x + w // 2, y + h // 2))
+
+    glasses = findEmptyGlasses(glasses)
+
+    return glasses, glasses_pos
+
+def findEmptyGlasses(glasses):
     max_value = 0
     max_index = 0
     for i in range(1, len(glasses)):
@@ -118,29 +111,8 @@ def get_glasses(image,glass_hi, x_handy, y_handy):
         for l in range(len(glasses[b])):
             if glasses[b][l] == max_index:
                 glasses[b][l] = 0
+    return glasses
 
-    return glasses, glasses_pos
-
-
-def findHandy(image, thresh):
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    sorted_contours = sorted(contours, key=lambda cnt: cv2.contourArea(cnt), reverse=True)
-    # print(sorted_contours)
-    for cnt in sorted_contours:
-        if cv2.contourArea(cnt) > 100000:
-            [x, y, w, h] = cv2.boundingRect(cnt)
-            # if  h/w<0.8 and h/w > 0.3:
-            if w / h > 0.3:
-                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                roi = thresh[y:y + h, x:x + w]
-                im = image[y:y + h, x:x + w]
-                # cv2.imwrite("./screen.jpg",im)
-                # cv2.imshow('norm', image)
-                # key = cv2.waitKey(0)
-                if key == 13:
-                    cv2.destroyAllWindows()
-                    return [x, y, w, h]
-    cv2.destroyAllWindows()
 
 
 def do_collide(s1, s2):
@@ -150,28 +122,6 @@ def do_collide(s1, s2):
     return x + w > middle_pos[0] > x and y + h > middle_pos[1] > y
 
 
-def get_gray_value(color_code):
-    x, y, z = color_code
-    x = (int(x) + int(x)) / 2
-    y = (int(y) + int(y)) / 2
-    z = (int(z) + int(z)) / 2
-    return int((x * x + y * y + z * z) ** 0.5)
-
-
-pos_handy = None
-
-
-def get_screen():
-    pass
-    # cmd = "adb  shell screencap -p"
-    # process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-    # binary_screenshot = process.stdout.read()
-    #
-    # binary_screenshot = binary_screenshot.replace(b'\r\r\n', b'\n')
-    # with open(filename, 'wb') as f:
-    #     f.write(binary_screenshot)
-
-
 def read_display():
     global pos_handy
     os.environ['PATH'] = 'C:/Program Files/platform-tools/'
@@ -179,19 +129,11 @@ def read_display():
     os.system("adb exec-out screencap -p > pic.png")
 
     image = cv2.imread("pic.png",cv2.COLOR_RGB2BGR)
-    # highlit_glasses(image)
-    # cv2.imshow("title",image)
+
     thresh = thresh_im(image)
     glass_highlit = highlit_glasses(image)
-    # if pos_handy is None:
-    #     x, y, w, h = findHandy(image, thresh)
-    #     pos_handy = [x, y, w, h]
-    # x, y, w, h = pos_handy
-    # image = image[y:y + h, x:x + w]
-    # cv2.imshow('norm',image)
-    # key = cv2.waitKey(0)
-    # glasses,glasses_pos = get_glasses(cv2.imread("./WaterPuzzle/screen.jpg"))
-    glasses, glasses_pos = get_glasses(image,glass_highlit, 0, 0)
+
+    glasses, glasses_pos = get_glasses(image,glass_highlit)
     return glasses, glasses_pos
 
 
@@ -205,5 +147,4 @@ def reverse_colorcode(color_code):
     x_color = color_code >> 16
     y_color = (color_code >> 8) & 0b11111111
     z_color = color_code & 0b11111111
-    # print("reversed colors:", z_color, y_color, x_color)
     return z_color, y_color, x_color
