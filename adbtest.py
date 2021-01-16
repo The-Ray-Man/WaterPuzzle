@@ -1,9 +1,9 @@
 import os
 import cv2
 import time
-# os.environ['PATH'] = 'C:/Program Files/platform-tools/'
+os.environ['PATH'] = 'C:/Program Files/platform-tools/'
 
-# os.system("adb exec-out screencap -p > pic.png")
+os.system("adb exec-out screencap -p > enjoyUs.png")
 
 # image = cv2.imread("pic.png")
 # cv2.imshow("title",image)
