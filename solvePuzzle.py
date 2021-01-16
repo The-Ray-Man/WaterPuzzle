@@ -9,9 +9,9 @@ while True:
     print(np.asarray(glasses))
     found_solution_, solution_ = decant(np.asarray(glasses), [], 200)
     if found_solution_:
-        bot(solution_,glasses_pos)
+        bot(solution_, glasses_pos)
     else:
         print("maybe impossible to solve!")
-        break   
+        break
     time.sleep(3)
-    playagain() 
+    playagain()

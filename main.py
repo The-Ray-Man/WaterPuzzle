@@ -103,5 +103,3 @@ def topElm(glass):
 
 def solved(state):
     return all(all(glass[0] == fluid for fluid in glass[1:]) for glass in state)
-
-
