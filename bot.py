@@ -2,14 +2,20 @@ import pyautogui
 import time
 import cv2
 import numpy as np
+import os
+
+os.environ['PATH'] = 'C:/Program Files/platform-tools/'
 
 
 def do_move(move_description, pos_glasses):
     src, dst = move_description
-
-    pyautogui.click(x=pos_glasses[src][0], y=pos_glasses[src][1])
+    cmd = f"adb shell input tap {pos_glasses[src][0]} {pos_glasses[src][1]}"
+    os.system(cmd)
+    # pyautogui.click(x=pos_glasses[src][0], y=pos_glasses[src][1])
     time.sleep(0.5)
-    pyautogui.click(x=pos_glasses[dst][0], y=pos_glasses[dst][1])
+    cmd = f"adb shell input tap {pos_glasses[dst][0]} {pos_glasses[dst][1]}"
+    os.system(cmd)
+    # pyautogui.click(x=pos_glasses[dst][0], y=pos_glasses[dst][1])
     time.sleep(2)
 
 
