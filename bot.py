@@ -48,5 +48,6 @@ def playagain():
     trows, tcols = small_image.shape[:2]
     pyautogui.moveTo(x=MPx + tcols // 2, y=MPy + trows // 2)
     time.sleep(1)
-    pyautogui.click()
+    cmd = f"adb shell input tap {pos_glasses[src][0]} {pos_glasses[src][1]}"
+    os.system(cmd)
     time.sleep(3)
