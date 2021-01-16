@@ -14,7 +14,7 @@ def find_glasses(im, thresh):
     average_height = 0
     i = 0
     for cnt in contours:
-        if cv2.contourArea(cnt) > 10000 and cv2.contourArea(cnt) < 100000:
+        if 10000 < cv2.contourArea(cnt) < 100000:
             [x, y, w, h] = cv2.boundingRect(cnt)
             # if not i == 0:
             #     if (h > average_height*1.1/i or h < average_height*0.9/i) or average_height != 0:
@@ -22,7 +22,7 @@ def find_glasses(im, thresh):
             # i += 1
             # average_height += h
             if w / h < 0.3:
-                if all(do_collide([x, y, w, h], s) == False for s in found_positions):
+                if all(do_collide([x, y, w, h], s) is False for s in found_positions):
                     found_positions.append([x, y, w, h])
                     cv2.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     # cv2.imshow("glasses",im)
@@ -125,7 +125,7 @@ def do_collide(s1, s2):
     x, y, w, h = s1
     middle_pos = (x + w // 2, y + h // 2)
     x, y, w, h = s2
-    return middle_pos[0] < x + w and middle_pos[0] > x and middle_pos[1] < y + h and middle_pos[1] > y
+    return x + w > middle_pos[0] > x and y + h > middle_pos[1] > y
 
 
 def get_gray_value(color_code):
@@ -144,7 +144,7 @@ def read_display():
     image = pyautogui.screenshot()
     image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     thresh = thresh_im(image)
-    if pos_handy == None:
+    if pos_handy is None:
         x, y, w, h = findHandy(image, thresh)
         pos_handy = [x, y, w, h]
     x, y, w, h = pos_handy
