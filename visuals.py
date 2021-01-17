@@ -60,7 +60,6 @@ def highlit_glasses(im):
 
 
 def get_glasses(image, glass_hi, debug=False):
-
     im = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     thresh = thresh_im(im)
     blur = cv2.blur(image, (6, 6))
@@ -71,6 +70,7 @@ def get_glasses(image, glass_hi, debug=False):
     color_id = 1
 
     for x, y, w, h in list(find_glasses(glass_hi, im)):
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
         h_ = h // 10 * 9 // 4
         liquids = []
@@ -144,7 +144,9 @@ def read_display(device):
     glass_highlit = highlit_glasses(image)
 
     glasses, glasses_pos = get_glasses(image, glass_highlit)
-
+    print(glasses_pos)
+    glasses_pos = put_glasses_down(device,glasses_pos)
+    print(glasses_pos)
     return glasses, glasses_pos
 
 
@@ -159,3 +161,30 @@ def reverse_colorcode(color_code):
     y_color = (color_code >> 8) & 0b11111111
     z_color = color_code & 0b11111111
     return z_color, y_color, x_color
+
+
+def put_glasses_down(device,glass_pos):
+    y_pos = [(i,y) for i,(x,y) in enumerate(glass_pos)]
+
+    first_glass = y_pos[0]
+    glass_rows = [y_pos[0]]
+
+    for i,y in y_pos[1:]:
+        if y < first_glass[1] + 110 and y > first_glass[1] - 110:
+            glass_rows.append((i,y))
+    remaining_glasse = [g for g in y_pos if g not in glass_rows]
+
+    rows = [glass_rows, remaining_glasse]
+    glasses_up = []
+    for row in rows:
+        average = sum([y for (i,y) in row]) / len(row)
+        for i,y in row:
+            if y < average:
+                glasses_up.append(i)
+                X, Y = glass_pos[i]
+                cmd = f"input tap {X} {Y}"
+                device.shell(cmd)
+        for i in glasses_up:
+            glass_pos[i] = (glass_pos[i][0],glass_pos[(i+1)%len(row)][1])
+
+    return glass_pos
