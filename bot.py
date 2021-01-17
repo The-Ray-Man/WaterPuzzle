@@ -3,8 +3,8 @@ import cv2
 import numpy as np
 
 
-MOVE_DELAY = 0.8
-FILL_DELAY = 0.6
+MOVE_DELAY = 1
+FILL_DELAY = 0.7
 
 
 def do_move(move_description, pos_glasses, device):
@@ -13,7 +13,7 @@ def do_move(move_description, pos_glasses, device):
     device.shell(cmd)
     # pyautogui.click(x=pos_glasses[src][0], y=pos_glasses[src][1])
 
-    time.sleep(0.1)
+    time.sleep(0.2)
 
     cmd = f"input tap {pos_glasses[dst][0]} {pos_glasses[dst][1]}"
     device.shell(cmd)

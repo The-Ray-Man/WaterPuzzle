@@ -105,6 +105,7 @@ def get_glasses(image, glass_hi, debug=False):
         glasses_pos.append((x + w // 2, y + h // 2))
 
     glasses = findEmptyGlasses(glasses)
+    cv2.imwrite("data.png",image)
 
     return glasses, glasses_pos
 
