@@ -109,7 +109,7 @@ def solve(glasses):
 
         if solved(currState):
             solvedId = currId
-            print("solved", currId)
+            print("solved! tested states: ", currId)
 
             # todo: reverse the voyage
             break
@@ -127,7 +127,7 @@ def solve(glasses):
             idCounter += 1
             q.append(hypState)
 
-    print(solvedId)
+    # print(solvedId)
     if solvedId == -2:
         print("no solution found")
         return False, []
@@ -142,4 +142,13 @@ def solve(glasses):
     solution = []
     for p in path:
         solution.append((p[0], p[2], p[4]))
+    blocked_glasses = set()
+    print("solution: ", solution)
+    for i in range(len(solution)-1, -1, -1):
+        if solution[i][0] not in blocked_glasses and solution[i][1] not in blocked_glasses:
+            if solution[i][2] == 3:
+                solution[i] = (solution[i][1], solution[i][0], 1)
+        blocked_glasses.add(solution[i][0])
+        blocked_glasses.add(solution[i][1])
+
     return True, solution

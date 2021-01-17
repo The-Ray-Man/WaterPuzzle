@@ -3,6 +3,7 @@ import numpy as np
 from collections import defaultdict
 import os
 import platform
+from ppadb.client import Client as AdbClient
 
 if platform.system() == "Windows":
     os.environ['PATH'] = 'C:/Program Files/platform-tools/'
@@ -129,15 +130,12 @@ def do_collide(s1, s2):
     return x + w > middle_pos[0] > x and y + h > middle_pos[1] > y
 
 
-def read_display():
+def read_display(device):
     global pos_handy
 
-    if platform.system() == "Windows":
-        os.environ['PATH'] = 'C:/Program Files/platform-tools/'
-        os.system("adb exec-out screencap -p > pic.png")
-    
-    else:
-        os.system("adb shell screencap -p > pic.png")
+    result = device.screencap()
+    with open("pic.png", "wb") as fp:
+        fp.write(result)
 
     image = cv2.imread("pic.png", cv2.COLOR_RGB2BGR)
 
