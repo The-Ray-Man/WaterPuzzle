@@ -134,8 +134,10 @@ def read_display():
 
     if platform.system() == "Windows":
         os.environ['PATH'] = 'C:/Program Files/platform-tools/'
-
-    os.system("adb shell screencap -p > pic.png")
+        os.system("adb exec-out screencap -p > pic.png")
+    
+    else:
+        os.system("adb shell screencap -p > pic.png")
 
     image = cv2.imread("pic.png", cv2.COLOR_RGB2BGR)
 

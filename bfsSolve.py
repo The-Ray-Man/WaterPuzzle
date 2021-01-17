@@ -3,6 +3,7 @@ from copy import deepcopy
 
 from collections import deque
 
+
 k = 4
 n = 4
 start = np.array(
@@ -140,5 +141,5 @@ def solve(glasses):
     path.reverse()
     solution = []
     for p in path:
-        solution.append((p[0], p[2], [4][0]))
+        solution.append((p[0], p[2], p[4]))
     return True, solution
