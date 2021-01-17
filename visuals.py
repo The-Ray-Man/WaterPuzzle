@@ -2,14 +2,19 @@ import cv2
 import numpy as np
 from collections import defaultdict
 import os
-os.environ['PATH'] = 'C:/Program Files/platform-tools/'
+import platform
+
+if platform.system() == "Windows":
+    os.environ['PATH'] = 'C:/Program Files/platform-tools/'
+
 
 def not_there():
     return None
 
 
 
-def find_glasses(glass_hi, im,debug = False):
+def find_glasses(glass_hi, im, debug=False):
+
     glass_hi = cv2.cvtColor(glass_hi, cv2.COLOR_HSV2BGR)
     glass_hi = cv2.cvtColor(glass_hi, cv2.COLOR_BGR2GRAY)
     # cv2.imshow("glass_hi",glass_hi)
@@ -26,7 +31,8 @@ def find_glasses(glass_hi, im,debug = False):
                     found_positions.append([x, y, w, h])
                     cv2.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     if debug:
-                        cv2.imshow("glasses",im)
+                        cv2.imshow("glasses", im)
+
                         cv2.waitKey(0)
                     yield [x, y, w, h]
 
@@ -37,15 +43,14 @@ def thresh_im(im):
     thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
     return thresh
 
-def highlit_glasses(im):
 
+def highlit_glasses(im):
     hsv_img = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
-    hsv_color1 = np.array([0,0,185])
-    hsv_color2 = np.array([0,0,188])
+    hsv_color1 = np.array([0, 0, 185])
+    hsv_color2 = np.array([0, 0, 188])
 
-
-    #Define threshold color range to filter
+    # Define threshold color range to filter
     mask = cv2.inRange(hsv_img, hsv_color1, hsv_color2)
 
     # Bitwise-AND mask and original image
@@ -53,8 +58,8 @@ def highlit_glasses(im):
     return res
 
 
+def get_glasses(image, glass_hi, debug=False):
 
-def get_glasses(image,glass_hi,debug = False):
     im = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     thresh = thresh_im(im)
     blur = cv2.blur(image, (6, 6))
@@ -80,8 +85,6 @@ def get_glasses(image,glass_hi,debug = False):
                 cv2.imshow("found glasses",im)
                 key = cv2.waitKey(0)
 
-
-
             if color_combined in color_dic.keys():
                 liquids.insert(0, color_dic[color_combined])
 
@@ -104,6 +107,7 @@ def get_glasses(image,glass_hi,debug = False):
 
     return glasses, glasses_pos
 
+
 def findEmptyGlasses(glasses):
     max_value = 0
     max_index = 0
@@ -118,7 +122,6 @@ def findEmptyGlasses(glasses):
     return glasses
 
 
-
 def do_collide(s1, s2):
     x, y, w, h = s1
     middle_pos = (x + w // 2, y + h // 2)
@@ -128,17 +131,19 @@ def do_collide(s1, s2):
 
 def read_display():
     global pos_handy
-    os.environ['PATH'] = 'C:/Program Files/platform-tools/'
 
-    os.system("adb exec-out screencap -p > pic.png")
+    if platform.system() == "Windows":
+        os.environ['PATH'] = 'C:/Program Files/platform-tools/'
 
-    image = cv2.imread("pic.png",cv2.COLOR_RGB2BGR)
+    os.system("adb shell screencap -p > pic.png")
 
+    image = cv2.imread("pic.png", cv2.COLOR_RGB2BGR)
 
     thresh = thresh_im(image)
     glass_highlit = highlit_glasses(image)
 
-    glasses, glasses_pos = get_glasses(image,glass_highlit)
+    glasses, glasses_pos = get_glasses(image, glass_highlit)
+
     return glasses, glasses_pos
 
 

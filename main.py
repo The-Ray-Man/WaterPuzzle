@@ -47,7 +47,9 @@ def decant(state, pass_solution, max_length):
         new_state = doMove(deepcopy(state), pos)
         # print(new_state)
 
-        found_solution, possible_solution = decant(new_state, pass_solution + [(pos[0], pos[2], pos[4]+1)], max_length)
+        found_solution, possible_solution = decant(new_state, pass_solution + [(pos[0], pos[2], pos[4] + 1)],
+                                                   max_length)
+
         if found_solution:
             # print(len(possible_solution))
             if solution_length(possible_solution) < max_length:
