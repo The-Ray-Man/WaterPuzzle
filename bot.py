@@ -17,6 +17,7 @@ def do_move(move_description, pos_glasses):
     os.system(cmd)
     # pyautogui.click(x=pos_glasses[src][0], y=pos_glasses[src][1])
     time.sleep(0.2)
+
     cmd = f"adb shell input tap {pos_glasses[dst][0]} {pos_glasses[dst][1]}"
     os.system(cmd)
     # pyautogui.click(x=pos_glasses[dst][0], y=pos_glasses[dst][1])
@@ -93,4 +94,5 @@ def playagain():
 
     time.sleep(2)
     return True
+
 

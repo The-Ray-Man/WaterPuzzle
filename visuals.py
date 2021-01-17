@@ -12,7 +12,9 @@ def not_there():
     return None
 
 
+
 def find_glasses(glass_hi, im, debug=False):
+
     glass_hi = cv2.cvtColor(glass_hi, cv2.COLOR_HSV2BGR)
     glass_hi = cv2.cvtColor(glass_hi, cv2.COLOR_BGR2GRAY)
     # cv2.imshow("glass_hi",glass_hi)
@@ -30,6 +32,7 @@ def find_glasses(glass_hi, im, debug=False):
                     cv2.rectangle(im, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     if debug:
                         cv2.imshow("glasses", im)
+
                         cv2.waitKey(0)
                     yield [x, y, w, h]
 
@@ -56,6 +59,7 @@ def highlit_glasses(im):
 
 
 def get_glasses(image, glass_hi, debug=False):
+
     im = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     thresh = thresh_im(im)
     blur = cv2.blur(image, (6, 6))
@@ -78,7 +82,7 @@ def get_glasses(image, glass_hi, debug=False):
             cv2.circle(image, pos, 10, (255, 0, 0), 10)
 
             if debug:
-                cv2.imshow("found glasses", im)
+                cv2.imshow("found glasses",im)
                 key = cv2.waitKey(0)
 
             if color_combined in color_dic.keys():
@@ -139,6 +143,7 @@ def read_display():
     glass_highlit = highlit_glasses(image)
 
     glasses, glasses_pos = get_glasses(image, glass_highlit)
+
     return glasses, glasses_pos
 
 
