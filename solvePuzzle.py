@@ -19,5 +19,6 @@ while True:
             bot(solution_, glasses_pos, device)
             if not playagain(device):
                 playagain(device)
+                
     else:
         playagain(device)
