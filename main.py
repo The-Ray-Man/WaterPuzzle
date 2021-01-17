@@ -16,18 +16,25 @@ def sort(state):
     return byte_state
 
 
-def decant(state, pass_solution, max_depth):
+def solution_length(solution):
+    length = 0
+    for step in solution:
+        length += step[2]
+    return length
+
+
+def decant(state, pass_solution, max_length):
     if solved(state):
         # print("found Solution")
         # solution.append(state)
         return True, pass_solution
 
     if sort(state) in already_checked:
-        if already_checked[sort(state)] <= len(pass_solution):
+        if already_checked[sort(state)] <= solution_length(pass_solution):
             return False, []
-    already_checked[sort(state)] = len(pass_solution)
+    already_checked[sort(state)] = solution_length(pass_solution)
 
-    if len(pass_solution) >= max_depth:
+    if solution_length(pass_solution) >= max_length:
         # print("max depth")
         return False, []
 
@@ -40,13 +47,13 @@ def decant(state, pass_solution, max_depth):
         new_state = doMove(deepcopy(state), pos)
         # print(new_state)
 
-        found_solution, possible_solution = decant(new_state, pass_solution + [(pos[0], pos[2])], max_depth)
+        found_solution, possible_solution = decant(new_state, pass_solution + [(pos[0], pos[2], pos[4]+1)], max_length)
         if found_solution:
             # print(len(possible_solution))
-            if len(possible_solution) < max_depth:
+            if solution_length(possible_solution) < max_length:
                 # print("new good solution", possible_solution)
                 solution = possible_solution
-                max_depth = len(possible_solution)
+                max_length = solution_length(possible_solution)
     if solution:
         return True, solution
     return False, []
