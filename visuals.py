@@ -9,6 +9,8 @@ def not_there():
 
 
 def find_glasses(im, thresh):
+    thresh = cv2.cvtColor(thresh,cv2.COLOR_HSV2BGR)
+    thresh = cv2.cvtColor(thresh,cv2.COLOR_BGR2GRAY)
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     found_positions = []
     average_height = 0
@@ -61,7 +63,7 @@ def highlit_glasses(im):
 
 
 
-def get_glasses(image,glass_hi, x_handy, y_handy):
+def get_glasses(image,glass_hi):
     im = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     thresh = thresh_im(im)
     blur = cv2.blur(image, (6, 6))
@@ -71,7 +73,7 @@ def get_glasses(image,glass_hi, x_handy, y_handy):
     color_dic = defaultdict(not_there)
     color_id = 1
 
-    for x, y, w, h in list(find_glasses(glass_hi, thresh)):
+    for x, y, w, h in list(find_glasses(im, glass_hi)):
         h_ = h // 10 * 9 // 4
         liquids = []
         for i in range(4):
@@ -106,7 +108,7 @@ def get_glasses(image,glass_hi, x_handy, y_handy):
 
                     color_id += 1
         glasses.append(liquids)
-        glasses_pos.append((x + w // 2 + x_handy, y + h // 2 + y_handy))
+        glasses_pos.append((x + w // 2, y + h // 2))
     print(glasses)
     max_value = 0
     max_index = 0
@@ -191,7 +193,7 @@ def read_display():
     # cv2.imshow('norm',image)
     # key = cv2.waitKey(0)
     # glasses,glasses_pos = get_glasses(cv2.imread("./WaterPuzzle/screen.jpg"))
-    glasses, glasses_pos = get_glasses(image,glass_highlit, 0, 0)
+    glasses, glasses_pos = get_glasses(image,glass_highlit)
     return glasses, glasses_pos
 
 
