@@ -8,6 +8,7 @@ def not_there():
     return None
 
 
+
 def find_glasses(glass_hi, im,debug = False):
     glass_hi = cv2.cvtColor(glass_hi, cv2.COLOR_HSV2BGR)
     glass_hi = cv2.cvtColor(glass_hi, cv2.COLOR_BGR2GRAY)
@@ -64,6 +65,7 @@ def get_glasses(image,glass_hi,debug = False):
     color_id = 1
 
     for x, y, w, h in list(find_glasses(glass_hi, im)):
+
         h_ = h // 10 * 9 // 4
         liquids = []
         for i in range(4):
@@ -73,9 +75,11 @@ def get_glasses(image,glass_hi,debug = False):
             # print(color)
             color_combined = color[2] * 256 ** 2 + color[1] * 256 + color[0]
             cv2.circle(image, pos, 10, (255, 0, 0), 10)
+
             if debug:
                 cv2.imshow("found glasses",im)
                 key = cv2.waitKey(0)
+
 
 
             if color_combined in color_dic.keys():
@@ -129,6 +133,7 @@ def read_display():
     os.system("adb exec-out screencap -p > pic.png")
 
     image = cv2.imread("pic.png",cv2.COLOR_RGB2BGR)
+
 
     thresh = thresh_im(image)
     glass_highlit = highlit_glasses(image)

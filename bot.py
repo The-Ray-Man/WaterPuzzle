@@ -62,10 +62,6 @@ def find_image(path):
     # # Extract the coordinates of our best match
     # MPx, MPy = mnLoc
 
-    # # Step 2: Get the size of the template. This is the same size as the match.
-    # trows, tcols = small_image.shape[:2]
-    # return (MPx + tcols // 2, MPy + trows // 2)
-
 def playagain():
 
     found,X,Y = find_image("enjoyUsTiny.png")
@@ -80,3 +76,4 @@ def playagain():
         os.system(cmd)
 
     time.sleep(4)
+
