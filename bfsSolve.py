@@ -9,14 +9,15 @@ start = np.array(
     [[1, 2, 3, 2], [1, 4, 3, 5], [6, 5, 1, 1], [4, 7, 8, 9], [6, 9, 7, 4], [8, 9, 9, 3], [3, 6, 5, 4], [5, 6, 7, 8],
      [8, 2, 2, 7], [0, 0, 0, 0], [0, 0, 0, 0]])
 
-#maps state to an id
-already_checked = dict()
+# maps state to an id
+global already_checked
 
-#maps id to parent
-parent = dict()
+# maps id to parent
+global parent
 
-#maps id to move that lead here
-howDidIGetHere = dict()
+# maps id to move that lead here
+global howDidIGetHere
+
 
 def sortNHash(state):
     sorted_state = state[np.lexsort(np.transpose(state)[::-1])]
@@ -24,8 +25,7 @@ def sortNHash(state):
     return byte_state
 
 
-
-#Takes a state and yields all possible following states
+# Takes a state and yields all possible following states
 def possibilities(state):
     topElements = [topElm(x) for x in state]
     pos_moves = []
@@ -43,7 +43,6 @@ def possibilities(state):
                                       anz))  # (source,pos_source,destination,pos_dest, anz)
 
     return pos_moves
-
 
 
 def doMove(state, move):
@@ -79,70 +78,67 @@ def topElm(glass):
 def solved(state):
     return all(all(glass[0] == fluid for fluid in glass[1:]) for glass in state)
 
-q = deque()
-q.append(start)
-parent[0] = -1
-already_checked[sortNHash(start)] = 0
 
-#i know this ugly
-solvedId = -2
+def solve(glasses):
 
+    global already_checked
+    already_checked = dict()
 
+    global parent
+    parent = dict()
 
-idCounter = 1
-while(q):
-    currState = q.popleft()
+    global howDidIGetHere
+    howDidIGetHere = dict()
 
-    currId = already_checked[sortNHash(currState)]
-    #todo check before adding to queue
-    #exit condition
-   
-    if solved(currState):
-        solvedId = currId
-        print("solved", currId)
-        
-        #todo: reverse the voyage
-        break
+    q = deque()
+    q.append(glasses)
+    parent[0] = -1
+    already_checked[sortNHash(glasses)] = 0
 
+    # i know this ugly
+    solvedId = -2
 
-    for pos in possibilities(currState):
-        #creates a new hypothetical state based on teh current state and a possible move
-        hypState = doMove(deepcopy(currState), pos)
+    idCounter = 1
+    while q:
+        currState = q.popleft()
 
-        if sortNHash(hypState) in already_checked:
-            continue
-        already_checked[sortNHash(hypState)] = idCounter
-        parent[idCounter] = currId
-        howDidIGetHere[idCounter] = pos
+        currId = already_checked[sortNHash(currState)]
+        # todo check before adding to queue
+        # exit condition
 
-        idCounter+=1
-        q.append(hypState)
-            
-print(solvedId)
-if(solvedId == -2):
-    print("no solution found")
-    exit()
+        if solved(currState):
+            solvedId = currId
+            print("solved", currId)
 
-currPar = solvedId
-path = []
-while(currPar != 0):
-    
-    path.append(howDidIGetHere[currPar])
-    currPar = parent[currPar]
+            # todo: reverse the voyage
+            break
 
-path.reverse()
-for p in path:
-    print(p[0], p[2], p[4])
+        for pos in possibilities(currState):
+            # creates a new hypothetical state based on teh current state and a possible move
+            hypState = doMove(deepcopy(currState), pos)
 
-print(len(path))
+            if sortNHash(hypState) in already_checked:
+                continue
+            already_checked[sortNHash(hypState)] = idCounter
+            parent[idCounter] = currId
+            howDidIGetHere[idCounter] = pos
 
-"""    
-print(start)
-for move in path:
-    print(doMove(start,move))
-"""
+            idCounter += 1
+            q.append(hypState)
 
+    print(solvedId)
+    if solvedId == -2:
+        print("no solution found")
+        return False, []
 
+    currPar = solvedId
+    path = []
+    while currPar != 0:
+        path.append(howDidIGetHere[currPar])
+        currPar = parent[currPar]
 
-
-        
+    path.reverse()
+    solution = []
+    for p in path:
+        solution.append((p[0], p[2], [4][0]))
+    return True, solution
