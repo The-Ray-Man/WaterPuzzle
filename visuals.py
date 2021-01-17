@@ -144,6 +144,8 @@ def read_display(device):
     glass_highlit = highlit_glasses(image)
 
     glasses, glasses_pos = get_glasses(image, glass_highlit)
+    if len(glasses) == 0:
+        return [], []
     print(glasses_pos)
     glasses_pos = put_glasses_down(device,glasses_pos)
     print(glasses_pos)
