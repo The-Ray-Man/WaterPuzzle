@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 import os
 
-os.environ['PATH'] = 'C:/Program Files/platform-tools/'
+os.environ['PATH'] = '/bin'
 
 
 def do_move(move_description, pos_glasses):
@@ -26,7 +26,7 @@ def bot(move_description, pos_glasses):
 
 
 def playagain():
-    os.environ['PATH'] = 'C:/Program Files/platform-tools/'
+    os.environ['PATH'] = '/bin'
 
     os.system("adb exec-out screencap -p > pic.png")
 

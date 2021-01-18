@@ -152,7 +152,7 @@ def get_screen():
 
 def read_display():
     global pos_handy
-    os.environ['PATH'] = 'C:/Program Files/platform-tools/'
+    os.environ['PATH'] = '/bin'
 
     os.system("adb exec-out screencap -p > pic.png")
 
